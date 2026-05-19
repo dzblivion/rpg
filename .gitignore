@@ -1,0 +1,7 @@
+backend/venv/
+__pycache__/
+*.pyc
+.env
+
+mobile/.dart_tool/
+mobile/build/
