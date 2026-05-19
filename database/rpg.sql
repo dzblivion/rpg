@@ -28,7 +28,7 @@ CREATE TABLE `inventario` (
   `id` int NOT NULL AUTO_INCREMENT,
   `personagem_id` int DEFAULT NULL,
   `item_id` int DEFAULT NULL,
-  `quantidade` int DEFAULT '1',
+  `capacidade` int DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `personagem_id` (`personagem_id`),
   KEY `item_id` (`item_id`),
@@ -57,10 +57,10 @@ CREATE TABLE `itens` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(100) DEFAULT NULL,
   `descricao` text,
-  `tipo` varchar(50) DEFAULT NULL,
+  `tipo_dano` varchar(50) DEFAULT 'Corte',
   `dano` int DEFAULT '0',
   `cura` int DEFAULT '0',
-  `raridade` varchar(50) DEFAULT NULL,
+  `categoria` varchar(50) DEFAULT 'I',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -86,7 +86,7 @@ CREATE TABLE `personagens` (
   `nome` varchar(100) DEFAULT NULL,
   `classe` varchar(50) DEFAULT NULL,
   `nivel` int DEFAULT '1',
-  `xp` int DEFAULT '0',
+  `nex` int DEFAULT '0',
   `hp` int DEFAULT '100',
   `sanidade` int DEFAULT '100',
   `forca` int DEFAULT '1',
