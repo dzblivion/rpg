@@ -77,7 +77,62 @@ def registrar():
         }
     ), 201
 
-# RO-dar
+@app.route("/entrar", methods=["POST"])
+def entrar():
+    """
+        A Rota espera o seguinte json:
+
+        {
+            "email": "",
+            "senha": ""
+        }    
+    """
+
+    data = request.get_json()
+
+    email = data["email"]
+    senha_digitada = data["senha"]
+
+    if (email is None or senha_digitada is None) or (len(email) == 0 or len(senha_digitada) == 0 ):
+        return jsonify(
+            {
+                "mensagem": "O email e senha são obrigatórios!"
+            }
+        ), 400
+
+    conn = Conn().init()
+
+    senha_banco = conn.cursor.execute("SELECT senha FROM usuarios WHERE email = %s", (email,))
+    senha_banco = conn.cursor.fetchone()
+    if senha_banco is None:
+        return jsonify(
+            {
+                "mensagem": "Email ou senha incorretos ou a conta não existe!"  
+            }
+        ), 401
+    
+    senha_banco, = senha_banco
+    senha_banco = senha_banco.encode('utf-8')
+
+    bytes_senha = senha_digitada.encode('utf-8')
+    conn.deinit()
+
+    if not cpt.checkpw(bytes_senha, senha_banco):
+        return jsonify(
+            {
+                "mensagem": "Email ou senha incorretos ou a conta não existe!"  
+            }
+        ), 401
+
+
+    return jsonify(
+        {
+            "mensagem": "Logado com sucesso",
+            "token": "<token aqui>"  
+        }
+    ), 201
+
+# Rodar
 if __name__ == '__main__':
     con = Conn().init()
     con.deinit()
