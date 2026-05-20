@@ -5,3 +5,5 @@ __pycache__/
 
 mobile/.dart_tool/
 mobile/build/
+
+backend/.env
