@@ -1,9 +1,16 @@
 from flask import Flask, request, jsonify
-import pymysql
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from dotenv import load_dotenv
 
+import pymysql
+import os
 import bcrypt as cpt
 
+load_dotenv()
+
 app = Flask(__name__)
+app.config[] = os.getenv('JWT_SECRET_KEY')
+jwt = JWTManager(app)
 
 # Banco
 class Conn:
@@ -124,11 +131,12 @@ def entrar():
             }
         ), 401
 
+    access_token = create_access_token(identity=email)
 
     return jsonify(
         {
             "mensagem": "Logado com sucesso",
-            "token": "<token aqui>"  
+            "token": access_token  
         }
     ), 201
 
