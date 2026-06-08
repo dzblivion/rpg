@@ -23,32 +23,32 @@ class _CadastroState extends State<Cadastro> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse("http://http://127.0.0.1:5000//registrar"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "nome": nomeController.text,
-          "email": emailController.text,
-          "senha": senhaController.text,
-        }),
-      );
+      final response = await http
+          .post(
+            Uri.parse("http://127.0.0.1:5000/registrar"),
+
+            headers: {"Content-Type": "application/json"},
+
+            body: jsonEncode({
+              "nome": nomeController.text,
+              "email": emailController.text,
+              "senha": senhaController.text,
+            }),
+          )
+          .timeout(Duration(seconds: 8));
 
       final data = jsonDecode(response.body);
 
       if (!mounted) return;
 
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(data["mensagem"])));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(data["mensagem"])));
 
+      if (response.statusCode == 201) {
         nomeController.clear();
         emailController.clear();
         senhaController.clear();
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(data["mensagem"])));
       }
     } catch (e) {
       if (!mounted) return;
@@ -57,6 +57,8 @@ class _CadastroState extends State<Cadastro> {
         context,
       ).showSnackBar(SnackBar(content: Text("Erro ao conectar com a API")));
     }
+
+    if (!mounted) return;
 
     setState(() {
       carregando = false;
@@ -126,7 +128,11 @@ class _CadastroState extends State<Cadastro> {
                   ),
                   TextField(
                     controller: nomeController,
-                    style: const TextStyle(color: Colors.black, fontSize: 18),
+                    style: const TextStyle(
+                      color: Color(0xff8B0F16),
+                      fontSize: 15,
+                      fontFamily: "Bitcount SemiBold",
+                    ),
                     decoration: InputDecoration(
                       labelText: "Nickname",
                       labelStyle: const TextStyle(
@@ -161,8 +167,12 @@ class _CadastroState extends State<Cadastro> {
                     ),
                   ),
                   TextField(
-                    controller: nomeController,
-                    style: const TextStyle(color: Colors.black, fontSize: 18),
+                    controller: emailController,
+                    style: const TextStyle(
+                      color: Color(0xff8B0F16),
+                      fontSize: 15,
+                      fontFamily: "Bitcount SemiBold",
+                    ),
                     decoration: InputDecoration(
                       labelText: "E-mail",
                       labelStyle: const TextStyle(
@@ -197,8 +207,12 @@ class _CadastroState extends State<Cadastro> {
                     ),
                   ),
                   TextField(
-                    controller: nomeController,
-                    style: const TextStyle(color: Colors.black, fontSize: 18),
+                    controller: senhaController,
+                    style: const TextStyle(
+                      color: Color(0xff8B0F16),
+                      fontSize: 15,
+                      fontFamily: "Bitcount SemiBold",
+                    ),
                     decoration: InputDecoration(
                       labelText: "Senha",
                       labelStyle: const TextStyle(
@@ -238,11 +252,8 @@ class _CadastroState extends State<Cadastro> {
                       spacing: 10,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Login()),
-                            );
+                          onPressed: () async {
+                            await registrar();
                           },
                           style: ButtonStyle(
                             backgroundColor:
@@ -254,6 +265,7 @@ class _CadastroState extends State<Cadastro> {
                                   }
                                   return Color(0x808B0F16);
                                 }),
+
                             foregroundColor:
                                 WidgetStateProperty.resolveWith<Color>((
                                   Set<WidgetState> states,
@@ -263,14 +275,17 @@ class _CadastroState extends State<Cadastro> {
                                   }
                                   return Color(0x80ffffff);
                                 }),
+
                             side: WidgetStateProperty.all(
                               BorderSide(color: Color(0xff8B0F16), width: 3),
                             ),
+
                             shape: WidgetStateProperty.all(
                               RoundedRectangleBorder(
-                                borderRadius: BorderRadiusGeometry.circular(50),
+                                borderRadius: BorderRadius.circular(50),
                               ),
                             ),
+
                             fixedSize: WidgetStateProperty.all(
                               Size(
                                 MediaQuery.of(context).size.width * 0.6,
@@ -278,13 +293,22 @@ class _CadastroState extends State<Cadastro> {
                               ),
                             ),
                           ),
-                          child: Text(
-                            "Começar",
-                            style: TextStyle(
-                              fontFamily: "INTTERNO",
-                              fontSize: 25,
-                            ),
-                          ),
+
+                          child: carregando
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  "Cadastrar",
+                                  style: TextStyle(
+                                    fontFamily: "INTTERNO",
+                                    fontSize: 25,
+                                  ),
+                                ),
                         ),
                         Text(
                           "ou faça login com",
@@ -310,13 +334,27 @@ class _CadastroState extends State<Cadastro> {
                               color: Color(0xff8B0F16),
                             ),
                             IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.email),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Login(),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.account_circle),
                               color: Color(0xff8B0F16),
                             ),
                             IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.email),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Login(),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.last_page),
                               color: Color(0xff8B0F16),
                             ),
                           ],

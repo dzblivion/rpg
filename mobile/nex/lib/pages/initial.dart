@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nex/pages/cadastro.dart';
+import 'package:nex/pages/login.dart';
 
 class InitialApp extends StatefulWidget {
   const InitialApp({super.key});
@@ -106,7 +107,7 @@ class _InitialAppState extends State<InitialApp> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Cadastro()),
+                            MaterialPageRoute(builder: (context) => Login()),
                           );
                         },
                         child: Text(

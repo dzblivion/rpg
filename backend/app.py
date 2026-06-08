@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_mail import Mail,  Message
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 import pymysql
 import os
@@ -11,6 +12,7 @@ import random as r
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # cofigs
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
