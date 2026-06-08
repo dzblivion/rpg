@@ -248,6 +248,177 @@ def atualizar_senha():
     ), 200
 
 
+# ──────────────────────────────────────────────
+# CRUD – Personagens (fichas)
+# ──────────────────────────────────────────────
+
+@app.route("/personagens", methods=["POST"])
+def criar_personagem():
+    """
+    Cria um novo personagem.
+
+    JSON esperado:
+    {
+        "usuario_id": 1,
+        "nome": "Aragorn",
+        "classe": "Guerreiro",
+        "nivel": 1,
+        "nex": 0,
+        "hp": 100,
+        "sanidade": 100,
+        "forca": 1,
+        "agilidade": 1,
+        "intelecto": 1,
+        "presenca": 1,
+        "vigor": 1
+    }
+    """
+    data = request.get_json()
+
+    campos = ["usuario_id", "nome", "classe"]
+    for campo in campos:
+        if campo not in data or data[campo] is None or str(data[campo]) == "":
+            return jsonify({"mensagem": f"O campo '{campo}' é obrigatório!"}), 400
+
+    conn = Conn().init()
+    sql = """
+        INSERT INTO personagens (usuario_id, nome, classe, nivel, nex, hp, sanidade, forca, agilidade, intelecto, presenca, vigor)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    conn.cursor.execute(sql, (
+        data["usuario_id"],
+        data["nome"],
+        data["classe"],
+        data.get("nivel", 1),
+        data.get("nex", 0),
+        data.get("hp", 100),
+        data.get("sanidade", 100),
+        data.get("forca", 1),
+        data.get("agilidade", 1),
+        data.get("intelecto", 1),
+        data.get("presenca", 1),
+        data.get("vigor", 1)
+    ))
+    conn.connection.commit()
+    personagem_id = conn.cursor.lastrowid
+    conn.deinit()
+
+    return jsonify({"mensagem": "Personagem criado com sucesso!", "id": personagem_id}), 201
+
+
+@app.route("/personagens", methods=["GET"])
+def listar_personagens():
+    """
+    Lista todos os personagens.
+    Query param opcional: ?usuario_id=1  (filtra por usuário)
+    """
+    usuario_id = request.args.get("usuario_id")
+
+    conn = Conn().init()
+
+    if usuario_id:
+        conn.cursor.execute("SELECT * FROM personagens WHERE usuario_id = %s", (usuario_id,))
+    else:
+        conn.cursor.execute("SELECT * FROM personagens")
+
+    rows = conn.cursor.fetchall()
+    colunas = [desc[0] for desc in conn.cursor.description]
+    conn.deinit()
+
+    personagens = [dict(zip(colunas, row)) for row in rows]
+
+    return jsonify({"personagens": personagens}), 200
+
+
+@app.route("/personagens/<int:personagem_id>", methods=["GET"])
+def buscar_personagem(personagem_id):
+    """
+    Retorna um personagem pelo ID.
+    """
+    conn = Conn().init()
+    conn.cursor.execute("SELECT * FROM personagens WHERE id = %s", (personagem_id,))
+    row = conn.cursor.fetchone()
+    colunas = [desc[0] for desc in conn.cursor.description]
+    conn.deinit()
+
+    if row is None:
+        return jsonify({"mensagem": "Personagem não encontrado!"}), 404
+
+    personagem = dict(zip(colunas, row))
+    return jsonify({"personagem": personagem}), 200
+
+
+@app.route("/personagens/<int:personagem_id>", methods=["PUT"])
+def atualizar_personagem(personagem_id):
+    """
+    Atualiza os dados de um personagem existente.
+
+    JSON esperado:
+    {
+        "nome": "Aragorn",
+        "classe": "Guerreiro",
+        "nivel": 5,
+        "nex": 50,
+        "hp": 150,
+        "sanidade": 80,
+        "forca": 3,
+        "agilidade": 2,
+        "intelecto": 1,
+        "presenca": 2,
+        "vigor": 3
+    }
+    """
+    data = request.get_json()
+
+    conn = Conn().init()
+    conn.cursor.execute("SELECT id FROM personagens WHERE id = %s", (personagem_id,))
+    if conn.cursor.fetchone() is None:
+        conn.deinit()
+        return jsonify({"mensagem": "Personagem não encontrado!"}), 404
+
+    campos = ["nome", "classe", "nivel", "nex", "hp", "sanidade", "forca", "agilidade", "intelecto", "presenca", "vigor"]
+    for campo in campos:
+        if campo not in data or data[campo] is None or str(data[campo]) == "":
+            conn.deinit()
+            return jsonify({"mensagem": f"O campo '{campo}' é obrigatório!"}), 400
+
+    sql = """
+        UPDATE personagens
+        SET nome = %s, classe = %s, nivel = %s, nex = %s,
+            hp = %s, sanidade = %s, forca = %s, agilidade = %s,
+            intelecto = %s, presenca = %s, vigor = %s
+        WHERE id = %s
+    """
+    conn.cursor.execute(sql, (
+        data["nome"], data["classe"], data["nivel"], data["nex"],
+        data["hp"], data["sanidade"], data["forca"], data["agilidade"],
+        data["intelecto"], data["presenca"], data["vigor"],
+        personagem_id
+    ))
+    conn.connection.commit()
+    conn.deinit()
+
+    return jsonify({"mensagem": "Personagem atualizado com sucesso!"}), 200
+
+
+@app.route("/personagens/<int:personagem_id>", methods=["DELETE"])
+def deletar_personagem(personagem_id):
+    """
+    Deleta um personagem pelo ID.
+    """
+    conn = Conn().init()
+    conn.cursor.execute("SELECT id FROM personagens WHERE id = %s", (personagem_id,))
+    if conn.cursor.fetchone() is None:
+        conn.deinit()
+        return jsonify({"mensagem": "Personagem não encontrado!"}), 404
+
+    conn.cursor.execute("DELETE FROM personagens WHERE id = %s", (personagem_id,))
+    conn.connection.commit()
+    conn.deinit()
+
+    return jsonify({"mensagem": "Personagem deletado com sucesso!"}), 200
+
+
 # utils
 def __rec_envia_codigo(email: str):
     msg = Message(
@@ -277,6 +448,4 @@ if __name__ == '__main__':
     con = Conn().init()
     con.deinit()
     
-    print("igual" if "$12$ar1IOFHGj3YMszpn41GMpuEIYivcTBOuKH8yfuSW6UiMGUIGh.M1m" == "$2b$12$MT2JWt5TTipK318tMbklI.2V/lqfet8a7tHcQoywshXIMmTiqS97m" else "diferente")
-
     app.run(debug=True)
