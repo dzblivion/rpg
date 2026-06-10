@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:nex/pages/cadastro.dart';
 import 'dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,6 +13,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  bool senhaOculta = true;
+
   final emailController = TextEditingController();
   final senhaController = TextEditingController();
 
@@ -28,13 +32,28 @@ class _LoginState extends State<Login> {
       if (!mounted) return;
 
       final dados = jsonDecode(resposta.body);
+      int usuarioId = dados["id"];
+      String nickname = dados["nome"];
 
       if (resposta.statusCode == 201) {
         String token = dados["token"];
 
+        final prefs = await SharedPreferences.getInstance();
+
+        if (!mounted) return;
+
+        await prefs.setString('token', token);
+        await prefs.setInt('id', usuarioId);
+        await prefs.setString('nome', nickname);
+        await prefs.setBool('logado', true);
+
+        if (!mounted) return;
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
+          MaterialPageRoute(
+            builder: (context) => Dashboard(nickname: nickname, id: usuarioId),
+          ),
         );
 
         debugPrint(token);
@@ -43,7 +62,6 @@ class _LoginState extends State<Login> {
           context,
         ).showSnackBar(SnackBar(content: Text(dados["mensagem"])));
 
-        // Navigator.pushReplacement(...)
       } else {
         ScaffoldMessenger.of(
           context,
@@ -376,7 +394,7 @@ class _LoginState extends State<Login> {
                 ],
               ),
               child: Column(
-                spacing: MediaQuery.of(context).size.height * 0.05,
+                spacing: 20,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -430,7 +448,7 @@ class _LoginState extends State<Login> {
                   ),
                   TextField(
                     controller: senhaController,
-                    obscureText: true,
+                    obscureText: senhaOculta,
                     style: const TextStyle(
                       color: Color(0xff8B0F16),
                       fontSize: 15,
@@ -442,6 +460,17 @@ class _LoginState extends State<Login> {
                         color: Color(0xff8B0F16),
                         fontSize: 20,
                         fontFamily: "Bitcount Regular",
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            senhaOculta = !senhaOculta;
+                          });
+                        },
+                        icon: Icon(
+                          senhaOculta ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        color: Color(0xff8B0F16),
                       ),
 
                       filled: true,
@@ -494,10 +523,11 @@ class _LoginState extends State<Login> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 15),
+                  SizedBox(height: 50),
                   Center(
                     child: Column(
-                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         ElevatedButton(
                           onPressed: () async {
@@ -545,40 +575,25 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                         ),
+                        SizedBox(height: 10),
                         Text(
-                          "ou faça login com",
+                          "ou faça seu cadastro com",
                           style: TextStyle(
                             fontFamily: "Bitcount Regular",
                             color: Color(0xff8B0F16),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Login(),
-                                  ),
-                                );
-                              },
-                              icon: Icon(Icons.email),
-                              color: Color(0xff8B0F16),
-                            ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.email),
-                              color: Color(0xff8B0F16),
-                            ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.email),
-                              color: Color(0xff8B0F16),
-                            ),
-                          ],
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Cadastro(),
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.app_registration_outlined),
+                          color: Color(0xff8B0F16),
                         ),
                       ],
                     ),

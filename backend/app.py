@@ -122,16 +122,16 @@ def entrar():
 
     conn = Conn().init()
 
-    senha_banco = conn.cursor.execute("SELECT senha FROM usuarios WHERE email = %s", (email,))
-    senha_banco = conn.cursor.fetchone()
-    if senha_banco is None:
+    conn.cursor.execute("SELECT id, nome, senha FROM usuarios WHERE email = %s", (email,))
+    usuario = conn.cursor.fetchone()
+    if usuario is None:
         return jsonify(
             {
                 "mensagem": "Email ou senha incorretos ou a conta não existe!"  
             }
         ), 401
     
-    senha_banco, = senha_banco
+    id, nome, senha_banco = usuario
     senha_banco = senha_banco.encode('utf-8')
 
     bytes_senha = senha_digitada.encode('utf-8')
@@ -149,7 +149,9 @@ def entrar():
     return jsonify(
         {
             "mensagem": "Logado com sucesso",
-            "token": access_token  
+            "id": id,
+            "nome": nome,
+            "token": access_token
         }
     ), 201
 

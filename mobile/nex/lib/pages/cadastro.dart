@@ -16,6 +16,7 @@ class _CadastroState extends State<Cadastro> {
   final TextEditingController senhaController = TextEditingController();
 
   bool carregando = false;
+  bool senhaOculta = true;
 
   Future<void> registrar() async {
     setState(() {
@@ -114,7 +115,7 @@ class _CadastroState extends State<Cadastro> {
                 ],
               ),
               child: Column(
-                spacing: MediaQuery.of(context).size.height * 0.05,
+                spacing: 20,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -207,6 +208,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                   ),
                   TextField(
+                    obscureText: senhaOculta,
                     controller: senhaController,
                     style: const TextStyle(
                       color: Color(0xff8B0F16),
@@ -219,6 +221,17 @@ class _CadastroState extends State<Cadastro> {
                         color: Color(0xff8B0F16),
                         fontSize: 20,
                         fontFamily: "Bitcount Regular",
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            senhaOculta = !senhaOculta;
+                          });
+                        },
+                        icon: Icon(
+                          senhaOculta ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        color: Color(0xff8B0F16),
                       ),
 
                       filled: true,
@@ -246,7 +259,7 @@ class _CadastroState extends State<Cadastro> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 50),
                   Center(
                     child: Column(
                       spacing: 10,
@@ -317,47 +330,15 @@ class _CadastroState extends State<Cadastro> {
                             color: Color(0xff8B0F16),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Login(),
-                                  ),
-                                );
-                              },
-                              icon: Icon(Icons.email),
-                              color: Color(0xff8B0F16),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Login(),
-                                  ),
-                                );
-                              },
-                              icon: Icon(Icons.account_circle),
-                              color: Color(0xff8B0F16),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Login(),
-                                  ),
-                                );
-                              },
-                              icon: Icon(Icons.last_page),
-                              color: Color(0xff8B0F16),
-                            ),
-                          ],
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Login()),
+                            );
+                          },
+                          icon: Icon(Icons.last_page),
+                          color: Color(0xff8B0F16),
                         ),
                       ],
                     ),
