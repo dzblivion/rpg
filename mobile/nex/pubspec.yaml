@@ -60,6 +60,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - assets/images/card_nex.png
+
   fonts:
     - family: UnZialish
       fonts:

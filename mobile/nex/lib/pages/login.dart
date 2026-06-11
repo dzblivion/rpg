@@ -92,7 +92,7 @@ class _LoginState extends State<Login> {
         return StatefulBuilder(
           builder: (dialogContext, setState) {
             return AlertDialog(
-              backgroundColor: const Color(0xff3a3a3a),
+              backgroundColor:Color(0xff3a3a3a),
               title: const Text(
                 "Recuperar Senha",
                 style: TextStyle(

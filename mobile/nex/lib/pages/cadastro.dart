@@ -337,7 +337,7 @@ class _CadastroState extends State<Cadastro> {
                               MaterialPageRoute(builder: (context) => Login()),
                             );
                           },
-                          icon: Icon(Icons.last_page),
+                          icon: Icon(Icons.account_circle),
                           color: Color(0xff8B0F16),
                         ),
                       ],

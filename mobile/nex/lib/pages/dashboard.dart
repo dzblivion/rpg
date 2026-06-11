@@ -44,6 +44,32 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  Future<void> deletarPersonagem(int personagemId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("http://127.0.0.1:5000/personagens/$personagemId"),
+      );
+
+      if (response.statusCode == 200) {
+        await listarPersonagens();
+
+        if (!mounted) return;
+
+        final dados = jsonDecode(response.body);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(dados["mensagem"])));
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao deletar personagem")));
+    }
+  }
+
   Future<void> confirmarSaida() async {
     final resultado = await showDialog<bool>(
       context: context,
@@ -149,20 +175,7 @@ class _DashboardState extends State<Dashboard> {
             ListTile(
               leading: Icon(Icons.dashboard, color: Color(0xff3a3a3a)),
               title: Text(
-                "Agentes",
-                style: TextStyle(
-                  color: Color(0xff3a3a3a),
-                  fontFamily: "Bitcount SemiBold",
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.groups, color: Color(0xff3a3a3a)),
-              title: Text(
-                "Jogadores",
+                "Dashboard",
                 style: TextStyle(
                   color: Color(0xff3a3a3a),
                   fontFamily: "Bitcount SemiBold",
@@ -230,6 +243,11 @@ class _DashboardState extends State<Dashboard> {
                                     color: Color(0xffFF5A1F),
                                     shape: BoxShape.circle,
                                   ),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Color(0xff3a3a3a),
+                                  ),
                                 ),
 
                                 SizedBox(width: 20),
@@ -287,22 +305,6 @@ class _DashboardState extends State<Dashboard> {
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 10),
-
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0x80FF5A1F),
-                            ),
-                            onPressed: () {},
-                            child: Text(
-                              "EDITAR PERSONAGEM",
-                              style: TextStyle(
-                                fontFamily: "INTTERNO",
-                                color: Color(0xffFF5A1F),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -323,8 +325,78 @@ class _DashboardState extends State<Dashboard> {
                       itemCount: personagens.length,
                       itemBuilder: (context, index) {
                         return CardAgente(
+                          personagem: personagens[index],
                           nome: personagens[index]["nome"],
                           especialidade: personagens[index]["classe"],
+                          onDelete: () async {
+                            bool? confirmar = await showDialog<bool>(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: Color(0xff3a3a3a),
+                                  title: const Text(
+                                    "Excluir Personagem",
+                                    style: TextStyle(
+                                      color: Color(0xffFF5A1F),
+                                      fontFamily: "Bitcount SemiBold",
+                                    ),
+                                  ),
+                                  content: Text(
+                                    "Deseja excluir ${personagens[index]["nome"]}?",
+                                    style: TextStyle(
+                                      color: Color(0xffFF5A1F),
+                                      fontFamily: "Bitcount Regular",
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                        backgroundColor: Color(0xffffffff),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text(
+                                        "Cancelar",
+                                        style: TextStyle(
+                                          color: Color(0xffFF5A1F),
+                                          fontFamily: "INTTERNO",
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                        backgroundColor: Color(0xffffffff),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: const Text(
+                                        "Excluir",
+                                        style: TextStyle(
+                                          color: Color(0xffFF5A1F),
+                                          fontFamily: "INTTERNO",
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmar == true) {
+                              await deletarPersonagem(personagens[index]["id"]);
+                            }
+                          },
+                          onAtualizar: listarPersonagens,
                         );
                       },
                     ),

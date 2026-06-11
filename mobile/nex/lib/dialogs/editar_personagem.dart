@@ -1,16 +1,17 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
-class CriarPersonagemDialog extends StatefulWidget {
-  const CriarPersonagemDialog({super.key});
+class EditarPersonagemDialog extends StatefulWidget {
+  final Map<String, dynamic> personagem;
+
+  const EditarPersonagemDialog({super.key, required this.personagem});
 
   @override
-  State<CriarPersonagemDialog> createState() => _CriarPersonagemDialogState();
+  State<EditarPersonagemDialog> createState() => _EditarPersonagemDialogState();
 }
 
-class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
+class _EditarPersonagemDialogState extends State<EditarPersonagemDialog> {
   final nomeController = TextEditingController();
   final classeController = TextEditingController();
   final nivelController = TextEditingController();
@@ -23,27 +24,31 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
   final presencaController = TextEditingController();
   final vigorController = TextEditingController();
 
-  Future<void> criarPersonagem() async {
+  @override
+  void initState() {
+    super.initState();
+
+    nomeController.text = widget.personagem["nome"].toString();
+    classeController.text = widget.personagem["classe"].toString();
+    nivelController.text = widget.personagem["nivel"].toString();
+    nexController.text = widget.personagem["nex"].toString();
+    hpController.text = widget.personagem["hp"].toString();
+    sanidadeController.text = widget.personagem["sanidade"].toString();
+    forcaController.text = widget.personagem["forca"].toString();
+    agilidadeController.text = widget.personagem["agilidade"].toString();
+    intelectoController.text = widget.personagem["intelecto"].toString();
+    presencaController.text = widget.personagem["presenca"].toString();
+    vigorController.text = widget.personagem["vigor"].toString();
+  }
+
+  Future<void> editarPersonagem() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      int? usuarioId = prefs.getInt("id");
-
-      if (usuarioId == null) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Usuário não encontrado. Faça login novamente."),
-          ),
-        );
-        return;
-      }
-
-      final response = await http.post(
-        Uri.parse("http://127.0.0.1:5000/personagens"),
+      await http.put(
+        Uri.parse(
+          "http://127.0.0.1:5000/personagens/${widget.personagem["id"]}",
+        ),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "usuario_id": usuarioId,
           "nome": nomeController.text,
           "classe": classeController.text,
           "nivel": int.parse(nivelController.text),
@@ -60,19 +65,7 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
 
       if (!mounted) return;
 
-      final dados = jsonDecode(response.body);
-
-      if (response.statusCode == 201) {
-        Navigator.pop(context, true);
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(dados["mensagem"])));
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(dados["mensagem"])));
-      }
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
 
@@ -104,8 +97,8 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Color(0xffFF5A1F),
-      title: const Text(
-        "Criar Personagem",
+      title: Text(
+        "Editar Personagem",
         style: TextStyle(color: Color(0xffffffff), fontFamily: "UnZialish"),
       ),
       content: SizedBox(
@@ -120,7 +113,7 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
                   color: Color(0xff3a3a3a),
                 ),
                 controller: nomeController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Nome",
                   labelStyle: TextStyle(
                     fontFamily: "Bitcount Regular",
@@ -135,7 +128,7 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
                   color: Color(0xff3a3a3a),
                 ),
                 controller: classeController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Classe",
                   labelStyle: TextStyle(
                     fontFamily: "Bitcount Regular",
@@ -159,20 +152,28 @@ class _CriarPersonagemDialogState extends State<CriarPersonagemDialog> {
       ),
       actions: [
         TextButton(
-          style: TextButton.styleFrom(backgroundColor: Color(0xffffffff)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text(
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            backgroundColor: Color(0xffffffff),
+          ),
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
             "Cancelar",
             style: TextStyle(color: Color(0xff3a3a3a), fontFamily: "INTTERNO"),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Color(0xff3a3a3a)),
-          onPressed: criarPersonagem,
-          child: Text(
-            "Criar",
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            backgroundColor: Color(0xff3a3a3a),
+          ),
+          onPressed: editarPersonagem,
+          child: const Text(
+            "Salvar",
             style: TextStyle(color: Color(0xffffffff), fontFamily: "INTTERNO"),
           ),
         ),

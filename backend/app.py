@@ -420,6 +420,51 @@ def deletar_personagem(personagem_id):
 
     return jsonify({"mensagem": "Personagem deletado com sucesso!"}), 200
 
+@app.route("/personagens/<int:personagem_id>", methods=["PUT"])
+def editar_personagem(personagem_id):
+    data = request.get_json()
+
+    conn = Conn().init()
+
+    conn.cursor.execute(
+        """
+        UPDATE personagens
+        SET nome=%s,
+            classe=%s,
+            nivel=%s,
+            nex=%s,
+            hp=%s,
+            sanidade=%s,
+            forca=%s,
+            agilidade=%s,
+            intelecto=%s,
+            presenca=%s,
+            vigor=%s
+        WHERE id=%s
+        """,
+        (
+            data["nome"],
+            data["classe"],
+            data["nivel"],
+            data["nex"],
+            data["hp"],
+            data["sanidade"],
+            data["forca"],
+            data["agilidade"],
+            data["intelecto"],
+            data["presenca"],
+            data["vigor"],
+            personagem_id
+        )
+    )
+
+    conn.connection.commit()
+    conn.deinit()
+
+    return jsonify({
+        "mensagem": "Personagem atualizado com sucesso!"
+    }), 200
+
 
 # utils
 def __rec_envia_codigo(email: str):
